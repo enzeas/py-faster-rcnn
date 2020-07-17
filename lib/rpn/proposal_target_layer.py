@@ -66,14 +66,14 @@ class ProposalTargetLayer(caffe.Layer):
             rois_per_image, self._num_classes)
 
         if DEBUG:
-            print 'num fg: {}'.format((labels > 0).sum())
-            print 'num bg: {}'.format((labels == 0).sum())
+            print('num fg: {}'.format((labels > 0).sum()))
+            print('num bg: {}'.format((labels == 0).sum()))
             self._count += 1
             self._fg_num += (labels > 0).sum()
             self._bg_num += (labels == 0).sum()
-            print 'num fg avg: {}'.format(self._fg_num / self._count)
-            print 'num bg avg: {}'.format(self._bg_num / self._count)
-            print 'ratio: {:.3f}'.format(float(self._fg_num) / float(self._bg_num))
+            print('num fg avg: {}'.format(self._fg_num / self._count))
+            print('num bg avg: {}'.format(self._bg_num / self._count))
+            print('ratio: {:.3f}'.format(float(self._fg_num) / float(self._bg_num)))
 
         # sampled rois
         top[0].reshape(*rois.shape)
@@ -124,6 +124,8 @@ def _get_bbox_regression_labels(bbox_target_data, num_classes):
         cls = clss[ind]
         start = 4 * cls
         end = start + 4
+        start = int(start)
+        end = int(end)
         bbox_targets[ind, start:end] = bbox_target_data[ind, 1:]
         bbox_inside_weights[ind, start:end] = cfg.TRAIN.BBOX_INSIDE_WEIGHTS
     return bbox_targets, bbox_inside_weights
@@ -163,6 +165,7 @@ def _sample_rois(all_rois, gt_boxes, fg_rois_per_image, rois_per_image, num_clas
     fg_rois_per_this_image = min(fg_rois_per_image, fg_inds.size)
     # Sample foreground regions without replacement
     if fg_inds.size > 0:
+        fg_rois_per_this_image = int(fg_rois_per_this_image)
         fg_inds = npr.choice(fg_inds, size=fg_rois_per_this_image, replace=False)
 
     # Select background RoIs as those within [BG_THRESH_LO, BG_THRESH_HI)
@@ -174,6 +177,7 @@ def _sample_rois(all_rois, gt_boxes, fg_rois_per_image, rois_per_image, num_clas
     bg_rois_per_this_image = min(bg_rois_per_this_image, bg_inds.size)
     # Sample background regions without replacement
     if bg_inds.size > 0:
+        bg_rois_per_this_image = int(bg_rois_per_this_image)
         bg_inds = npr.choice(bg_inds, size=bg_rois_per_this_image, replace=False)
 
     # The indices that we're selecting (both fg and bg)
